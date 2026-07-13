@@ -1,0 +1,10 @@
+{
+  "name": "peer-review",
+  "version": "1.0.0",
+  "description": "Pre-merge code reviewer that checks diffs against the linked Jira ticket or GitHub Issue — security, logic, style, and root-cause alignment.",
+  "author": {
+    "name": "ahmakengineer",
+    "url": "https://github.com/ahmakengineer"
+  },
+  "skills": "./SKILL.md"
+}

@@ -35,38 +35,19 @@ Your team's real conventions live in one editable file. Point it at your linter 
 
 ## Installation
 
-### Quick install (recommended)
+Copy the `peer-review` folder into your agent's skills directory:
 
-Run the auto-detection script from the `peer-review` folder:
+| Agent | Path |
+|---|---|
+| Claude Code | `.claude/skills/peer-review/` or `~/.claude/skills/peer-review/` |
+| OpenCode | `.opencode/skills/peer-review/` or `~/.config/opencode/skills/peer-review/` |
+| Cursor | `.cursor/skills/peer-review/` |
+| Windsurf | `.windsurf/skills/peer-review/` |
+| Codex CLI | `.agents/skills/peer-review/` or `~/.agents/skills/peer-review/` |
+| Gemini CLI | `.gemini/skills/peer-review/` or `~/.gemini/skills/peer-review/` |
+| GitHub Copilot | `.github/skills/peer-review/` or `~/.copilot/skills/peer-review/` |
 
-```bash
-# Project-scoped (committed to repo, shared with team)
-./install.sh
-
-# Per-user (available in all your projects)
-./install.sh --global
-```
-
-On Windows:
-
-```powershell
-.\install.ps1          # project-scoped
-.\install.ps1 -Global  # per-user
-```
-
-The script detects which agents you have installed and copies the skill to each one. Then restart your agent or reload its skills.
-
-### Agent paths (manual install)
-
-| Agent | Project path | Global path |
-|---|---|---|
-| Claude Code | `.claude/skills/peer-review/` | `~/.claude/skills/peer-review/` |
-| Cursor | `.cursor/skills/peer-review/` | — |
-| Windsurf | `.windsurf/skills/peer-review/` | — |
-| OpenCode | `.opencode/skills/peer-review/` | `~/.config/opencode/skills/peer-review/` |
-| Codex CLI | `.agents/skills/peer-review/` | `~/.agents/skills/peer-review/` |
-| Gemini CLI | `.gemini/skills/peer-review/` | `~/.gemini/skills/peer-review/` |
-| GitHub Copilot | `.github/skills/peer-review/` | `~/.copilot/skills/peer-review/` |
+Then restart your agent or reload its skills.
 
 ### Claude.ai / Claude Cowork
 
@@ -84,6 +65,14 @@ Zip the folder and upload via **Customize → Skills → +** (requires Pro/Max/T
 peer-review/
 ├── README.md
 ├── SKILL.md
+├── LICENSE
+├── package.json
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
+├── .opencode/
+│   └── plugins/
+│       └── peer-review.mjs
 └── references/
     ├── security-checklist.md
     ├── logic-review.md

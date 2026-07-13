@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "peer-review",
+  "description": "Pre-merge code reviewer that checks diffs against the linked Jira ticket or GitHub Issue — security, logic, style, and root-cause alignment.",
+  "owner": {
+    "name": "ahmakengineer",
+    "url": "https://github.com/ahmakengineer"
+  },
+  "plugins": [
+    {
+      "name": "peer-review",
+      "description": "Review git changes for security issues, logic bugs, and coding-guideline violations before a merge — grounded against the linked ticket.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

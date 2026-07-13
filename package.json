@@ -1,0 +1,31 @@
+{
+  "name": "@ahmakengineer/peer-review",
+  "version": "1.0.0",
+  "description": "Pre-merge code reviewer that checks diffs against the linked Jira ticket or GitHub Issue — security, logic, style, and root-cause alignment.",
+  "keywords": ["opencode-plugin", "opencode", "peer-review", "code-review", "skills", "jira", "github"],
+  "license": "MIT",
+  "author": {
+    "name": "ahmakengineer",
+    "url": "https://github.com/ahmakengineer"
+  },
+  "homepage": "https://github.com/ahmakengineer/peer-review",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmakengineer/peer-review.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmakengineer/peer-review/issues"
+  },
+  "main": ".opencode/plugins/peer-review.mjs",
+  "exports": {
+    ".": ".opencode/plugins/peer-review.mjs",
+    "./plugin": ".opencode/plugins/peer-review.mjs"
+  },
+  "files": [
+    "SKILL.md",
+    "references/",
+    ".opencode/",
+    "README.md",
+    "LICENSE"
+  ],
+}
