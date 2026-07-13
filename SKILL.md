@@ -25,7 +25,11 @@ Before reviewing code, find out what this diff is supposed to fix — a review t
 
 If the ticket can't be fetched (permissions, not found, connector unavailable), say so plainly and proceed with a code-only review — don't block the whole review over a missing ticket.
 
+If the issue body is a single line with no root-cause / acceptance criteria, say so and skip structured ticket alignment — don't force a root-cause comparison onto a ticket that never stated one. Lower confidence on any ticket-alignment findings accordingly.
+
 ## Step 1: Detect mode and diff scope
+
+First check `git rev-parse --git-dir 2>$null` — if it fails, say so and stop; all subsequent steps depend on a git repository.
 
 **Mode** — check what's available:
 - If `gh` CLI is authenticated and the current branch has an open PR (`gh pr view` succeeds), or the user names a specific PR/number → **GitHub mode**.
@@ -33,14 +37,16 @@ If the ticket can't be fetched (permissions, not found, connector unavailable), 
 
 **Diff scope** (auto-detected, don't ask unless ambiguous):
 - **GitHub mode**: `gh pr diff <number>` for the exact PR diff; base branch via `gh pr view --json baseRefName`.
+  - **Fallback**: If `gh` fails (not authenticated, repo not accessible), derive the PR URL from `git remote get-url origin` (strip `.git`, extract `owner/repo`) + `pull/<number>` and fetch via `curl -L "https://github.com/owner/repo/pull/<number>.diff"`. If the PR number is unknown, ask the user for it — don't re-call `gh pr view` (it will fail for the same reason `gh pr diff` did).
 - **Local mode**: diff current branch against the repo's default branch:
   ```
-  git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's@^origin/@@'
+  git rev-parse --abbrev-ref origin/HEAD 2>/dev/null
   ```
   Fall back to `main`, then `master`. Then `git diff <default-branch>...HEAD`.
 - No diff found → say so and stop, don't invent findings.
 
-For large diffs (roughly >800 changed lines), triage: files touching auth, data access, network calls, secrets/config, and payment/PII first; batch remaining low-risk files (pure tests, generated code, lockfiles) with a lighter pass.
+For large diffs (>800 changed lines), triage: files touching auth, data access, network calls, secrets/config, and payment/PII first; batch remaining low-risk files (pure tests, generated code, lockfiles) with a lighter pass.
+For medium diffs (400–800 lines), flag structural patterns (duplication, consistency across files, architectural decisions) rather than per-line nits — the cost-per-comment of a medium diff is low but the signal of a structural flag is high.
 
 ## Step 2: Run the four sub-reviews
 
@@ -84,11 +90,26 @@ Ask via `ask_user_input_v0` before posting anywhere (skip the ask only if the us
 
 Then deliver:
 - **PR comments** (GitHub mode): `gh api repos/{owner}/{repo}/pulls/{number}/reviews -f event=COMMENT` with a `comments` array of `{path, line, body}`, prefixed with severity tags. Never `REQUEST_CHANGES`/`APPROVE`. If `gh api` fails, fall back to one summary comment via `gh pr comment`.
+  - **Line numbers from raw diff**: The `@@ -oldStart,oldCount +newStart,newCount @@` hunk header gives the starting line in the new file. Add the 0-based offset within the hunk to `newStart` to get the target line number. E.g. for `@@ -10,7 +20,9 @@`, the 3rd line in the hunk maps to line 22.
+  - **Cross-platform body delivery**: On Windows (PowerShell), multi-line bodies break inline in `gh pr comment`. Write to a temp file and use `--body-file`: `Set-Content -Path "$env:TEMP\review-body.md" -Value $body; gh pr comment <PR> --body-file "$env:TEMP\review-body.md"`. Avoid single-argument `-b` with multiline strings in non-Unix shells — it doesn't handle newlines portably.
 - **Jira comment**: post the grouped findings + tally as a comment on the ticket via the Jira connector. Keep it scannable — same severity-grouped format as Step 4.
 - **Review doc attached to Jira**: generate a markdown doc (title, ticket ID, PR link, full findings, tally) and attach it to the ticket as a file via the Jira connector.
 - **Local mode with no ticket destination chosen**: just present findings in chat.
 
 Always tell the user in chat afterward: what was posted, where, and the severity breakdown — don't leave them to go check.
+
+## Failure modes
+
+| Failure | Recovery |
+|---------|----------|
+| Not a git repo | Say so and stop — cannot diff without one. |
+| `gh` not installed | Skip GitHub mode; go to Local mode without asking. |
+| `gh issue view` fails | Treat as unfetchable ticket — proceed code-only (same as Step 0 catch-all). |
+| Raw URL diff fetch fails (network, private repo, not GitHub) | Fall through to Local mode. |
+| No default branch can be determined | Ask user for the base branch name. |
+| PR number unknown (in fallback path) | Ask user; if they don't have one, fall to Local mode. |
+| `gh pr comment` fails after `gh api` fails | Present findings in chat — all PR posting paths exhausted. |
+| Jira posting fails | Present findings in chat. |
 
 ## What this skill does not do
 
