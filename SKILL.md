@@ -48,7 +48,7 @@ First check `git rev-parse --git-dir 2>$null` — if it fails, say so and stop; 
 For large diffs (>800 changed lines), triage: files touching auth, data access, network calls, secrets/config, and payment/PII first; batch remaining low-risk files (pure tests, generated code, lockfiles) with a lighter pass.
 For medium diffs (400–800 lines), flag structural patterns (duplication, consistency across files, architectural decisions) rather than per-line nits — the cost-per-comment of a medium diff is low but the signal of a structural flag is high.
 
-## Step 2: Run the four sub-reviews
+## Step 2: Run the five sub-reviews
 
 Independent passes — don't let a style nit and a SQL injection collapse into one verdict.
 
@@ -59,6 +59,10 @@ Independent passes — don't let a style nit and a SQL injection collapse into o
    - Does the diff address the ticket's **root cause**, or does it patch a symptom? (e.g. ticket root cause says "race condition in cache layer," diff only adds a null check — that's a symptom patch, flag it.)
    - Does the diff match the ticket's stated **resolution/fix approach**, or has it drifted from what was planned without the ticket being updated?
    - Are there acceptance criteria the diff doesn't visibly satisfy?
+5. **Ticket hygiene** (only if a ticket was resolved in Step 0) — mechanical cross-linking and freshness checks, all Low severity:
+   - PR description doesn't reference the ticket (found via branch name or user but missing from body) → suggest `Fixes #123` / `PROJ-123` for audit trail.
+   - PR title lacks ticket ID when team convention embeds it (common in Jira workflows) — flag only if at least one other PR in the same repo follows the pattern.
+   - PR body describes an approach that observably differs from the diff's implementation — flag as stale and suggest updating the description.
 
 ## Step 3: Score severity
 
