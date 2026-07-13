@@ -59,12 +59,78 @@ You don't invoke this with a command — just describe what you want in plain la
 
 ---
 
-## Setup
+## Installation
 
-1. Place the `peer-review/` folder wherever your environment loads skills from.
-2. Connect the **Jira** MCP connector if you want ticket-grounded reviews on Jira tickets (GitHub Issues work via the `gh` CLI, no extra connector needed).
-3. Open `references/style-guidelines.md` and swap in your team's actual conventions once you've run it a few times and know what keeps coming up.
-4. Make sure `gh` (GitHub CLI) is installed and authenticated for PR-mode reviews.
+Skills use a portable format (a folder with `SKILL.md` at its root), but *how* you install one differs by surface. Pick the one that matches where you work.
+
+### Claude Code
+
+Filesystem-based — no upload step, just drop the folder in place.
+
+**Personal (available in every project on your machine):**
+```bash
+mkdir -p ~/.claude/skills
+cp -r peer-review ~/.claude/skills/peer-review
+```
+
+**Project-scoped (committed to the repo, shared with your whole team):**
+```bash
+mkdir -p .claude/skills
+cp -r peer-review .claude/skills/peer-review
+```
+Commit `.claude/skills/peer-review/` to git so teammates get it automatically when they pull.
+
+**Verify it's picked up:**
+```bash
+claude skills list
+```
+or just ask Claude "what skills do you have available?" If it doesn't show up, restart Claude Code — new skills are picked up at session start.
+
+### Claude.ai (Chat) and Claude Cowork
+
+These share one personal skill library, so installing here makes it available in both.
+
+1. Zip the skill folder (must contain `SKILL.md` at the top level, e.g. `references/` alongside it — not nested one level deeper):
+   ```bash
+   cd peer-review && zip -r ../peer-review.zip . && cd ..
+   ```
+2. In Claude, open **Customize** in the left sidebar → **Skills** tab → click the **+** button → upload the zip.
+3. Requires Pro, Max, Team, or Enterprise with **Code execution and file creation** enabled (Settings → Capabilities, or Organization settings on Team/Enterprise).
+4. The skill is enabled by default after upload — toggle it off in Customize > Skills if you ever want to disable it without deleting it.
+
+**Team/Enterprise organization-wide rollout:** an org owner can upload it once under **Organization settings > Skills** to provision it for everyone, instead of each person uploading their own copy.
+
+### Claude for Excel / PowerPoint / Word / Outlook
+
+No separate install — any skill enabled in your Claude Chat/Cowork settings (via the step above) is automatically available in these add-ins too.
+
+### Other major agents
+
+`peer-review` uses only the two universal frontmatter fields (`name`, `description`) — no Claude-specific extensions — so it's portable to every agent that implements the open Agent Skills standard. Same folder, just copied to a different path.
+
+| Agent | Personal/global path | Project path | Notes |
+|---|---|---|---|
+| **Cursor** | *(none — project-scoped only)* | `.cursor/skills/peer-review/` | Reload window (`Cmd/Ctrl+Shift+P` → "Developer: Reload Window") to pick it up |
+| **Windsurf (Cascade)** | *(none — project-scoped only)* | `.windsurf/skills/peer-review/` | Reads `.claude/skills/` too if Claude Code config reading is enabled |
+| **OpenCode** | `~/.config/opencode/skills/peer-review/` | `.opencode/skills/peer-review/` | Also auto-reads `.claude/skills/` and `.agents/skills/` — no copy needed if either already exists |
+| **Codex CLI** (OpenAI) | `~/.agents/skills/peer-review/` or `~/.codex/skills/peer-review/` | `.agents/skills/peer-review/` (scans up to repo root) | Restart Codex, or it should auto-detect |
+| **Gemini CLI** | `~/.gemini/skills/peer-review/` | `.gemini/skills/peer-review/` | `.agents/skills/` alias also works; run `/skills reload` to pick it up without restarting |
+| **GitHub Copilot** (VS Code, CLI, cloud agent) | `~/.copilot/skills/peer-review/` | `.github/skills/peer-review/` | Also reads `.claude/skills/` automatically. For Copilot code review specifically, keeping "review" in the directory name (as here) helps it auto-apply during PR reviews |
+
+**Generic steps for any of the above:**
+```bash
+mkdir -p <target-skills-path>
+cp -r peer-review <target-skills-path>/peer-review
+```
+Then restart the agent, or use its reload command (`/skills reload`, `/reload-plugins`, "Reload Window," etc. — varies by tool, see the Notes column).
+
+**Cross-agent tip:** several of these tools (OpenCode, Codex CLI, Gemini CLI, GitHub Copilot) natively fall back to reading `.claude/skills/` or `.agents/skills/` if present. If you're using more than one of these agents on the same repo, committing the skill to `.claude/skills/peer-review/` or `.agents/skills/peer-review/` once may cover several tools simultaneously — check the Notes column above before duplicating it into every agent-specific folder.
+
+### Setup checklist (all surfaces)
+
+- [ ] **Jira connector** — connect it if you want ticket-grounded reviews for Jira tickets. GitHub Issues need no extra connector; the skill uses the `gh` CLI directly.
+- [ ] **`gh` CLI** — installed and authenticated (`gh auth status`), required for PR-mode reviews and posting PR comments.
+- [ ] **`references/style-guidelines.md`** — swap in your team's actual conventions once you've run it a few times and know what keeps coming up. Skills installed from a shared directory are view-only; if you installed via the directory rather than uploading your own copy, download it, edit, and re-upload as your own to customize this file.
 
 ---
 
